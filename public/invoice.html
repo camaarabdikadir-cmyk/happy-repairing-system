@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - Happy Repairing</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; color: #000; }
+    
+    .invoice-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+    
+    /* Logo-ga SVG-ga ah oo aan u sameeyay si uu waligiis u shaqeeyo */
+    .logo-area { display: flex; flex-direction: column; }
+    .logo-title { font-family: 'Arial Black', Impact, sans-serif; font-size: 28px; font-weight: 900; color: #111; margin: 0; line-height: 1; letter-spacing: -1px; }
+    .logo-title span { color: #a80000; }
+    .logo-subtitle { font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #333; margin-top: 5px; }
+
+    .invoice-title { font-size: 36px; font-weight: bold; color: #a80000; text-transform: uppercase; letter-spacing: 2px; }
+    
+    /* Info Blocks */
+    .info-row { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 20px; }
+    .info-box { flex: 1; }
+    .info-box.right { display: flex; flex-direction: column; gap: 10px; }
+    
+    .section-title {
+      background: #a80000;
+      color: #fff;
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .info-box p { margin: 5px 0; font-size: 14px; font-weight: bold; }
+    
+    .invoice-details-row { display: flex; gap: 10px; }
+    .invoice-details-row div { flex: 1; }
+    .invoice-details-row .section-title { margin-bottom: 10px; }
+    .invoice-details-row p { margin: 5px 0; font-size: 14px; font-weight: bold; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th { background: #a80000; color: #fff; text-align: left; padding: 10px; font-size: 14px; border: 1px solid #000; }
+    td { padding: 10px; font-size: 14px; border: 1px solid #000; font-weight: bold; }
+    .empty-row td { height: 25px; }
+
+    /* Totals Area */
+    .totals-area { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; }
+    .thanks { font-style: italic; font-weight: bold; font-size: 16px; }
+    
+    .totals-table { width: 300px; border-collapse: collapse; }
+    .totals-table td { padding: 8px 10px; border: 1px solid #000; }
+    .totals-table .label { background: #a80000; color: #fff; font-weight: bold; width: 50%; }
+    .totals-table .value { text-align: right; }
+    
+    .totals-table tr.final-row .label, .totals-table tr.final-row .value { border-bottom: 3px solid #000; }
+
+    /* Footer */
+    .footer { text-align: center; margin-top: 60px; font-size: 13px; font-weight: bold; }
+    .footer p { margin: 3px 0; }
+
+    /* Print Media Query */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .invoice-container { box-shadow: none; padding: 0; max-width: 100%; }
+      .no-print { display: none !important; }
+    }
+    
+    .no-print { text-align: center; margin-bottom: 20px; }
+    .btn { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <button class="btn" onclick="window.print()">🖨️ Print / Daabac Invoice-ka</button>
+    <button class="btn" onclick="window.location.href='repairs.html'" style="background: #666;">⬅️ Ku noqo Repairs</button>
+  </div>
+
+  <div class="invoice-container" id="invoiceContent">
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-area">
+        <!-- LOGO-GA CUSUB (SVG) oo aan internet u baahnayn -->
+        <h1 class="logo-title">h<span>appy</span></h1>
+        <div class="logo-subtitle">REPAIRING CENTER</div>
+      </div>
+      <div class="invoice-title">INVOICE</div>
+    </div>
+
+    <!-- Info Blocks -->
+    <div class="info-row">
+      <div class="info-box">
+        <div class="section-title">BILL TO</div>
+        <p>Customer Name: <span id="invCustomer">...</span></p>
+        <p>Phone: <span id="invPhone">...</span></p>
+        <p>Address: <span id="invAddress">...</span></p>
+      </div>
+      <div class="info-box right" style="max-width: 300px;">
+        <div class="invoice-details-row">
+          <div>
+            <div class="section-title">INVOICE #</div>
+            <p id="invNumber">...</p>
+          </div>
+          <div>
+            <div class="section-title">DATE</div>
+            <p id="invDate">...</p>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">CUSTOMER ID</div>
+          <p id="invCustId">CUS-...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 50%;">DESCRIPTION</th>
+          <th style="width: 15%;">QTY</th>
+          <th style="width: 15%;">UNIT PRICE</th>
+          <th style="width: 20%;">AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceItems">
+        <!-- JS ayaa halkan soo buuxin doona xogta -->
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-area">
+      <div class="thanks">Thank you for your business!</div>
+      
+      <table class="totals-table">
+        <tr>
+          <td class="label">Sub Total</td>
+          <td class="value" id="invSubTotal">$0.00</td>
+        </tr>
+        <tr>
+          <td class="label">Discount</td>
+          <td class="value" id="invDiscount">$0.00</td>
+        </tr>
+        <tr>
+          <td class="label">Net Amount</td>
+          <td class="value" id="invNet">$0.00</td>
+        </tr>
+        <tr>
+          <td class="label">Paid</td>
+          <td class="value" id="invPaid">$0.00</td>
+        </tr>
+        <tr class="final-row">
+          <td class="label">Balance</td>
+          <td class="value" id="invBalance">$0.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>If you have any questions about this invoice, please contact</p>
+      <p>0634245417 | zuldan@gmail.com</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Soo qaado ID-ga repair-ka ee URL-ka
+    const urlParams = new URLSearchParams(window.location.search);
+    const repairId = urlParams.get('id');
+
+    if (!repairId) {
+      alert('Repair ID-ga lama helin!');
+      window.location.href = 'repairs.html';
+    }
+
+    async function loadInvoice() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/repairs/${repairId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Xogta lama helin');
+        const r = await res.json();
+
+        // Buuxi Xogta Macmiilka
+        document.getElementById('invCustomer').textContent = r.customer_name;
+        document.getElementById('invPhone').textContent = r.customer_phone || 'N/A';
+        document.getElementById('invAddress').textContent = r.customer_address || 'N/A';
+        
+        // Buuxi Xogta Invoice-ka
+        document.getElementById('invNumber').textContent = `JOB-${String(r.repair_id).padStart(5, '0')}`;
+        document.getElementById('invDate').textContent = new Date(r.received_date || r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('invCustId').textContent = `CUS-${String(r.repair_id).padStart(5, '0')}`;
+
+        // Buuxi Shaxda (Description)
+        let desc = '';
+        if (r.repair_type === 'Spare Part' && r.part_name) {
+          desc = `${r.brand || ''} ${r.model || ''} - ${r.part_name} (${r.problem || 'Repair'})`;
+        } else {
+          desc = `${r.brand || ''} ${r.model || ''} - ${r.problem || 'Repair Service'}`;
+        }
+
+        let qty = r.spare_part_quantity || 1;
+        let cost = Number(r.repair_cost) || 0;
+        let unitPrice = cost / qty;
+
+        // Ku dar shaxda
+        const itemsHtml = `
+          <tr>
+            <td>${desc}</td>
+            <td>${qty}</td>
+            <td>$${unitPrice.toFixed(2)}</td>
+            <td>$${cost.toFixed(2)}</td>
+          </tr>
+        `;
+        
+        // Ku dar 5 saf oo madhan si ay u ekaato sida sawirka
+        let emptyRows = '';
+        for(let i = 0; i < 5; i++) {
+          emptyRows += `<tr class="empty-row"><td></td><td></td><td></td><td></td></tr>`;
+        }
+        document.getElementById('invoiceItems').innerHTML = itemsHtml + emptyRows;
+
+        // Buuxi Lacagaha
+        const paid = Number(r.paid) || 0;
+        const balance = cost - paid;
+
+        document.getElementById('invSubTotal').textContent = `$${cost.toFixed(2)}`;
+        document.getElementById('invDiscount').textContent = `$0.00`;
+        document.getElementById('invNet').textContent = `$${cost.toFixed(2)}`;
+        document.getElementById('invPaid').textContent = `$${paid.toFixed(2)}`;
+        document.getElementById('invBalance').textContent = `$${balance.toFixed(2)}`;
+
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    loadInvoice();
+  </script>
+</body>
+</html>

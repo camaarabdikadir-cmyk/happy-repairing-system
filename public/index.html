@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Happy Repairing </title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      height: 100vh; 
+      background: var(--bg);
+    }
+    .login-box { 
+      width: 100%; 
+      max-width: 400px; 
+      background: var(--surface); 
+      padding: 40px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+    }
+    .login-box h2 {
+      font-family: var(--font-heading);
+      text-align: center;
+      font-size: 32px;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .login-box p {
+      text-align: center; 
+      color: var(--muted); 
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>happy.repairing</h2>
+    <p>Fadlan gal system-ka</p>
+    
+    <form id="loginForm" class="form-grid" style="grid-template-columns: 1fr;">
+      <label class="field">Username 
+        <input type="text" id="username" required placeholder="Geli username-kaaga">
+      </label>
+      <label class="field">Password 
+        <input type="password" id="password" required placeholder="Geli password-kaaga">
+      </label>
+      <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Gal System-ka</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            username: document.getElementById('username').value, 
+            password: document.getElementById('password').value 
+          })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.user.username);
+          localStorage.setItem('role', data.user.role); // <--- Halkan ayaa Role-ka lagu kaydiyay
+          window.location.href = 'dashboard.html';
+        } else {
+          alert(data.error || 'Khalad ayaa dhacay');
+        }
+      } catch (err) {
+        alert('Server-ka lama xiriiri karo');
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payments - Happy Repairing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <!-- Topbar Qaybta 1aad -->
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing 
+      <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <!-- Topbar Qaybta 2aad (Navigation) -->
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="repairs.html">Repairs</a>
+    <a href="spare-parts.html">Spare Parts</a>
+    <a href="sales.html">Sales</a>
+    <a href="payments.html" class="active">Payments</a>
+  </div>
+
+  <div class="container">
+    
+    <!-- Section Heading -->
+    <div class="section-heading">
+      <h2>Payments</h2>
+      <div class="line"></div>
+      <button class="btn" onclick="openPaymentModal()">+ New Payment</button>
+    </div>
+
+    <!-- Table-ka -->
+    <div style="overflow-x: auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Device</th>
+            <th>Amount Paid</th>
+            <th>Method</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody id="paymentsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: Lacag Cusub -->
+  <dialog id="paymentDialog" style="width: min(600px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Diiwaangeli Lacag Bixin</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <form id="paymentForm" class="form-grid">
+        <label class="field full">Dooro Repair-ka (Macmiilka)
+          <select name="repair_id" id="repairSelect" required>
+            <option value="">-- Soo xarayso macmiil --</option>
+          </select>
+        </label>
+        
+        <label class="field">Lacagta La Bixiyay ($) <input type="number" name="amount_paid" step="0.01" required min="0.01"></label>
+        
+        <label class="field">Habka Lacagta 
+          <select name="payment_method">
+            <option value="Cash">Cash (Caddaan)</option>
+            <option value="Zaad">Zaad</option>
+            <option value="E-Dahab">E-Dahab</option>
+            <option value="Sahal">Sahal</option>
+          </select>
+        </label>
+        
+        <label class="field full">Faahfaahin <input type="text" name="note" placeholder="Tusaale: Baaqi lacagta dayactirka"></label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('paymentDialog').close()">Jooji</button>
+      <button type="submit" form="paymentForm" class="btn">Keydi Lacagta</button>
+    </div>
+  </dialog>
+
+  <script src="js/common.js"></script>
+  <script>
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+    // Soo bandhig magaca qofka galay
+    document.getElementById('userDisplay').textContent = localStorage.getItem('username') || 'admin';
+
+    // ==========================================
+    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const role = localStorage.getItem('role');
+      const nav = document.querySelector('.nav');
+
+      if (role === 'admin') {
+        if (!nav.querySelector('a[href="users.html"]')) {
+          const usersLink = document.createElement('a');
+          usersLink.href = 'users.html';
+          usersLink.textContent = 'Users';
+          nav.appendChild(usersLink);
+        }
+      } 
+      else if (role === 'repair') {
+        nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
+      } 
+      else if (role === 'sales') {
+        nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
+      }
+    });
+
+    // Soo qaado macaamiisha lacagta lagu bixinayo
+    async function openPaymentModal() {
+      try {
+        const repairs = await API.get('/api/repairs');
+        const select = document.getElementById('repairSelect');
+        
+        select.innerHTML = '<option value="">-- Soo xarayso macmiil --</option>' + 
+          repairs.map(r => `<option value="${r.repair_id}">#${r.repair_id} - ${r.customer_name} (${r.brand} ${r.model}) | Hadhay: $${r.balance}</option>`).join('');
+        
+        document.getElementById('paymentDialog').showModal();
+      } catch (err) { alert(err.message); }
+    }
+
+    // Soo bandhig lacagaha
+    async function loadPayments() {
+      try {
+        const payments = await API.get('/api/payments');
+        document.getElementById('paymentsTable').innerHTML = payments.map(p => `
+          <tr>
+            <td>${new Date(p.payment_date).toLocaleDateString()}</td>
+            <td style="font-weight: 500;">${p.customer_name}</td>
+            <td>${p.model || '-'}</td>
+            <td style="color: #16a34a; font-weight: 600;">$${Number(p.amount_paid).toFixed(2)}</td>
+            <td><span class="badge" style="background: var(--hover-bg); color: var(--text);">${p.payment_method}</span></td>
+            <td style="color: var(--muted);">${p.note || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (err) { alert(err.message); }
+    }
+
+    document.getElementById('paymentForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        await API.post('/api/payments', body);
+        document.getElementById('paymentDialog').close();
+        e.target.reset();
+        loadPayments();
+      } catch (err) { alert(err.message); }
+    };
+
+    loadPayments();
+  </script>
+</body>
+</html>

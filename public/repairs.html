@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Repairs - Happy Repairing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <!-- Topbar Qaybta 1aad -->
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing 
+      <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <!-- Topbar Qaybta 2aad (Navigation) -->
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="repairs.html" class="active">Repairs</a>
+    <a href="spare-parts.html">Spare Parts</a>
+    <a href="sales.html">Sales</a>
+    <a href="payments.html">Payments</a>
+  </div>
+
+  <div class="container">
+    
+    <!-- Section Heading -->
+    <div class="section-heading">
+      <h2>Repairs</h2>
+      <div class="line"></div>
+      <button class="btn" onclick="openRepairModal()">+ New Repair</button>
+    </div>
+
+    <!-- Table-ka -->
+    <div style="overflow-x: auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Device</th>
+            <th>Repair Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="repairsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal-ka lagu qorayo ama lagu beddelayo Repair-ka -->
+  <dialog id="repairDialog" style="width: min(800px, 95vw);">
+    <div class="dialog-head">
+      <h3 id="modalTitle" style="margin: 0; font-family: var(--font-heading);">Diiwaangeli Repair Cusub</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <form id="repairForm" class="form-grid">
+        <input type="hidden" id="edit_id" value="">
+        
+        <label class="field">Magaca Macmiilka * <input type="text" name="customer_name" id="f_customer_name" required></label>
+        <label class="field">Telefoonka <input type="text" name="customer_phone" id="f_customer_phone"></label>
+        <label class="field full">Cinwaanka <input type="text" name="customer_address" id="f_customer_address"></label>
+        
+        <label class="field">Nooca (Mobile, Laptop...) <input type="text" name="device_type" id="f_device_type"></label>
+        <label class="field">Brand <input type="text" name="brand" id="f_brand"></label>
+        <label class="field">Model <input type="text" name="model" id="f_model"></label>
+        <label class="field">IMEI / Serial <input type="text" name="imei_serial" id="f_imei_serial"></label>
+
+        <label class="field full">Cilad / Cabashada <textarea name="problem" id="f_problem" rows="2"></textarea></label>
+        <label class="field full">Faahfaahinta Dayactirka <textarea name="repair_description" id="f_repair_description" rows="2"></textarea></label>
+        
+        <label class="field">Taariikhda La Helay <input type="date" name="received_date" id="f_received_date"></label>
+        <label class="field">Taariikhda La Bilaabay <input type="date" name="start_date" id="f_start_date"></label>
+
+        <label class="field">Qiimaha Dayactirka ($) <input type="number" name="repair_cost" id="f_repair_cost" step="0.01" value="0.00"></label>
+        <label class="field">Status-ka 
+          <select name="status" id="f_status">
+            <option value="In Progress">In Progress</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </label>
+        
+        <label class="field full">Nooca Dayactirka 
+          <select name="repair_type" id="f_repair_type" onchange="toggleSparePart()">
+            <option value="No Spare Part">No Spare Part (Qayb lama isticmaalin)</option>
+            <option value="Spare Part">Spare Part (Waxaa loo baahan yahay qayb)</option>
+          </select>
+        </label>
+
+        <!-- Qaybta Spare Part-ka -->
+        <div id="sparePartDiv" style="display: none; grid-column: 1/-1; background: var(--hover-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-top: 0.5rem;">
+          <h4 style="margin-top: 0; font-family: var(--font-heading);">Qaybta Dayactirka (Spare Part)</h4>
+          <div class="form-grid">
+            <label class="field">Dooro Qaybta * 
+              <select name="spare_part_id" id="f_spare_part_id">
+                <option value="">-- Soo xarayso qaybta --</option>
+              </select>
+            </label>
+            <label class="field">Tirada * 
+              <input type="number" name="spare_part_quantity" id="f_spare_part_quantity" value="1" min="1">
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('repairDialog').close()">Jooji</button>
+      <button type="submit" form="repairForm" class="btn" id="saveBtn">Keydi</button>
+    </div>
+  </dialog>
+
+  <!-- Modal-ka View-ga (Arag xogta oo dhan) -->
+  <dialog id="viewDialog" style="width: min(600px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Faahfaahinta Repair-ka</h3>
+    </div>
+    <div class="dialog-body">
+      <div id="viewContent" style="font-size: 0.95rem; line-height: 1.8;"></div>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn secondary" onclick="document.getElementById('viewDialog').close()">Xir</button>
+    </div>
+  </dialog>
+
+  <script src="js/common.js"></script>
+  <script>
+    document.getElementById('f_received_date').valueAsDate = new Date();
+    
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+    // Soo bandhig magaca qofka galay
+    document.getElementById('userDisplay').textContent = localStorage.getItem('username') || 'admin';
+
+    // ==========================================
+    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const role = localStorage.getItem('role');
+      const nav = document.querySelector('.nav');
+
+      if (role === 'admin') {
+        if (!nav.querySelector('a[href="users.html"]')) {
+          const usersLink = document.createElement('a');
+          usersLink.href = 'users.html';
+          usersLink.textContent = 'Users';
+          nav.appendChild(usersLink);
+        }
+      } 
+      else if (role === 'repair') {
+        nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
+      } 
+      else if (role === 'sales') {
+        nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
+      }
+    });
+
+    function toggleSparePart() {
+      const type = document.getElementById('f_repair_type').value;
+      const div = document.getElementById('sparePartDiv');
+      const select = document.getElementById('f_spare_part_id');
+      
+      if (type === 'Spare Part') {
+        div.style.display = 'block';
+        select.required = true;
+      } else {
+        div.style.display = 'none';
+        select.required = false;
+        select.value = '';
+      }
+    }
+
+    async function loadPartsDropdown() {
+      try {
+        const parts = await API.get('/api/spare-parts');
+        const select = document.getElementById('f_spare_part_id');
+        select.innerHTML = '<option value="">-- Soo xarayso qaybta --</option>' + 
+          parts.filter(p => p.current_stock > 0).map(p => 
+            `<option value="${p.part_id}">${p.part_name} (${p.brand}) - Stock: ${p.current_stock} | Qiimaha: $${p.sell_price}</option>`
+          ).join('');
+      } catch (err) { console.error(err); }
+    }
+
+    function openRepairModal() {
+      document.getElementById('repairForm').reset();
+      document.getElementById('edit_id').value = '';
+      document.getElementById('modalTitle').textContent = 'Diiwaangeli Repair Cusub';
+      document.getElementById('saveBtn').textContent = 'Keydi Repair-ka';
+      document.getElementById('f_received_date').valueAsDate = new Date();
+      toggleSparePart();
+      loadPartsDropdown();
+      document.getElementById('repairDialog').showModal();
+    }
+
+    async function editRepair(id) {
+      try {
+        const data = await API.get(`/api/repairs/${id}`);
+        
+        document.getElementById('edit_id').value = data.repair_id;
+        document.getElementById('modalTitle').textContent = `Wax ka beddel Repair #${data.repair_id}`;
+        document.getElementById('saveBtn').textContent = 'Cusboonaysii (Update)';
+        
+        document.getElementById('f_customer_name').value = data.customer_name || '';
+        document.getElementById('f_customer_phone').value = data.customer_phone || '';
+        document.getElementById('f_customer_address').value = data.customer_address || '';
+        document.getElementById('f_device_type').value = data.device_type || '';
+        document.getElementById('f_brand').value = data.brand || '';
+        document.getElementById('f_model').value = data.model || '';
+        document.getElementById('f_imei_serial').value = data.imei_serial || '';
+        document.getElementById('f_problem').value = data.problem || '';
+        document.getElementById('f_repair_description').value = data.repair_description || '';
+        document.getElementById('f_repair_cost').value = data.repair_cost || 0;
+        document.getElementById('f_status').value = data.status || 'In Progress';
+        document.getElementById('f_repair_type').value = data.repair_type || 'No Spare Part';
+        
+        document.getElementById('f_received_date').value = data.received_date ? data.received_date.split('T')[0] : '';
+        document.getElementById('f_start_date').value = data.start_date ? data.start_date.split('T')[0] : '';
+        
+        await loadPartsDropdown();
+        
+        if (data.repair_type === 'Spare Part' && data.spare_part_id) {
+          document.getElementById('f_spare_part_id').value = data.spare_part_id;
+          document.getElementById('f_spare_part_quantity').value = data.spare_part_quantity || 1;
+        }
+        
+        toggleSparePart();
+        document.getElementById('repairDialog').showModal();
+      } catch (err) { alert(err.message); }
+    }
+
+    async function viewRepair(id) {
+      try {
+        const r = await API.get(`/api/repairs/${id}`);
+        document.getElementById('viewContent').innerHTML = `
+          <p><strong>Macmiil:</strong> ${r.customer_name} (${r.customer_phone || 'Telefoon ma jiro'})</p>
+          <p><strong>Cinwaan:</strong> ${r.customer_address || '-'}</p>
+          <p><strong>Device:</strong> ${r.device_type || '-'} | ${r.brand || '-'} ${r.model || '-'}</p>
+          <p><strong>IMEI/Serial:</strong> ${r.imei_serial || '-'}</p>
+          <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--border);">
+          <p><strong>Cilada:</strong> ${r.problem || '-'}</p>
+          <p><strong>Dayactirka:</strong> ${r.repair_description || '-'}</p>
+          <p><strong>Repair Type:</strong> ${r.repair_type} ${r.part_name ? `(${r.part_name} x ${r.spare_part_quantity})` : ''}</p>
+          <p><strong>Lacagta Dayactirka:</strong> $${r.repair_cost}</p>
+          <p><strong>Lacagta la bixiyay:</strong> <span style="color:#16a34a; font-weight:600;">$${r.paid}</span></p>
+          <p><strong>Hadhay:</strong> <span style="color:#dc2626; font-weight:600;">$${r.balance}</span></p>
+          <p><strong>Status:</strong> <span class="badge">${r.status}</span></p>
+          <p><strong>Taariikhda la helay:</strong> ${r.received_date ? new Date(r.received_date).toLocaleDateString() : '-'}</p>
+        `;
+        document.getElementById('viewDialog').showModal();
+      } catch (err) { alert(err.message); }
+    }
+
+    async function loadRepairs() {
+      try {
+        const data = await API.get('/api/repairs');
+        document.getElementById('repairsTable').innerHTML = data.map(r => `
+          <tr>
+            <td>#${r.repair_id}</td>
+            <td style="font-weight: 500;">${r.customer_name}<br><small style="color: var(--muted); font-weight: 400;">${r.customer_phone || ''}</small></td>
+            <td>${r.brand || ''} ${r.model || ''}</td>
+            <td>${r.repair_type}</td>
+            <td>
+              <span class="badge" style="background: ${r.status === 'Delivered' ? '#dcfce7' : '#fef3c7'}; color: ${r.status === 'Delivered' ? '#166534' : '#92400e'};">
+                ${r.status}
+              </span>
+            </td>
+            <td style="white-space: nowrap;">
+              <button class="btn" onclick="viewRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">View</button>
+              
+              <!-- BADHANKA CUSUB EE INVOICE-KA -->
+              <button class="btn" onclick="window.open('invoice.html?id=${r.repair_id}', '_blank')" style="padding: 6px 12px; min-height: 36px; font-size: 14px; border-color: #228B22; color: #228B22;">📄 Invoice</button>
+
+              <button class="btn" onclick="editRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Edit</button>
+              <button class="btn danger" onclick="deleteRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) { alert(err.message); }
+    }
+
+    document.getElementById('repairForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      
+      const id = body.edit_id;
+      delete body.edit_id; 
+
+      if (body.repair_type === 'No Spare Part') {
+        delete body.spare_part_id;
+        delete body.spare_part_quantity;
+      }
+
+      try {
+        if (id) {
+          await API.put(`/api/repairs/${id}`, body);
+        } else {
+          await API.post('/api/repairs', body);
+        }
+        document.getElementById('repairDialog').close();
+        loadRepairs();
+      } catch (err) { alert(err.message); }
+    };
+
+    async function deleteRepair(id) {
+      if (!confirm('Ma hubtaa inaad tirtirto repair-kan?')) return;
+      try {
+        await API.delete(`/api/repairs/${id}`);
+        loadRepairs();
+      } catch (err) { alert(err.message); }
+    }
+
+    loadRepairs();
+  </script>
+</body>
+</html>

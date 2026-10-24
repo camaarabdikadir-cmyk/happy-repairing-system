@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spare Parts - Happy Repairing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <!-- Topbar Qaybta 1aad -->
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing 
+      <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <!-- Topbar Qaybta 2aad (Navigation) -->
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="repairs.html">Repairs</a>
+    <a href="spare-parts.html" class="active">Spare Parts</a>
+    <a href="sales.html">Sales</a>
+    <a href="payments.html">Payments</a>
+  </div>
+
+  <div class="container">
+    
+    <!-- Section Heading -->
+    <div class="section-heading">
+      <h2>Spare Parts</h2>
+      <div class="line"></div>
+      <button class="btn" onclick="openPartModal()">+ New Part</button>
+    </div>
+
+    <!-- Table-ka -->
+    <div style="overflow-x: auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Part Name</th>
+            <th>Brand</th>
+            <th>Buy Price</th>
+            <th>Sell Price</th>
+            <th>Current Stock</th>
+            <th>Min Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="partsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: Qayb Cusub -->
+  <dialog id="partDialog" style="width: min(650px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Ku Dar Qayb Cusub</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <form id="partForm" class="form-grid">
+        <label class="field full">Magaca Qaybta * <input type="text" name="part_name" required placeholder="Tusaale: Display A12"></label>
+        <label class="field">Brand <input type="text" name="brand" placeholder="Samsung, iPhone..."></label>
+        <label class="field">Stock-ka Hore <input type="number" name="current_stock" value="0"></label>
+        <label class="field">Qiimaha Iibsiga ($) <input type="number" name="buy_price" step="0.01" required></label>
+        <label class="field">Qiimaha Iibka ($) <input type="number" name="sell_price" step="0.01" required></label>
+        <label class="field full">Stock-ka Ugu Yar (Digniin) <input type="number" name="minimum_stock" value="5"></label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('partDialog').close()">Jooji</button>
+      <button type="submit" form="partForm" class="btn">Keydi</button>
+    </div>
+  </dialog>
+
+  <!-- Modal: Stock In -->
+  <dialog id="stockDialog" style="width: min(500px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Soo Geli Stock Cusub</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <p id="stockPartName" style="font-weight: 600; color: var(--text); font-size: 1.1rem; margin-bottom: 1rem;"></p>
+      <form id="stockForm" class="form-grid">
+        <input type="hidden" name="part_id" id="stockPartId">
+        <label class="field">Tirada (Quantity) * <input type="number" name="quantity" required min="1"></label>
+        <label class="field">Qiimaha Iibsiga ($) * <input type="number" name="buy_price" step="0.01" required></label>
+        <label class="field full">Faahfaahin <input type="text" name="note" placeholder="Tusaale: Alaab cusub oo soo gaadhay"></label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('stockDialog').close()">Jooji</button>
+      <button type="submit" form="stockForm" class="btn">Ku Dar Stock-ka</button>
+    </div>
+  </dialog>
+
+  <script src="js/common.js"></script>
+  <script>
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+    // Soo bandhig magaca qofka galay
+    document.getElementById('userDisplay').textContent = localStorage.getItem('username') || 'admin';
+
+    // ==========================================
+    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const role = localStorage.getItem('role');
+      const nav = document.querySelector('.nav');
+
+      if (role === 'admin') {
+        if (!nav.querySelector('a[href="users.html"]')) {
+          const usersLink = document.createElement('a');
+          usersLink.href = 'users.html';
+          usersLink.textContent = 'Users';
+          nav.appendChild(usersLink);
+        }
+      } 
+      else if (role === 'repair') {
+        nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
+      } 
+      else if (role === 'sales') {
+        nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
+      }
+    });
+    
+    function openPartModal() { 
+      document.getElementById('partForm').reset();
+      document.getElementById('partDialog').showModal(); 
+    }
+
+    function openStockModal(id, name, buyPrice) {
+      document.getElementById('stockPartId').value = id;
+      document.getElementById('stockPartName').textContent = `Qaybta: ${name}`;
+      document.querySelector('#stockForm [name="buy_price"]').value = buyPrice;
+      document.getElementById('stockDialog').showModal();
+    }
+
+    async function loadParts() {
+      try {
+        const parts = await API.get('/api/spare-parts');
+        document.getElementById('partsTable').innerHTML = parts.map(p => {
+          const isLow = p.current_stock <= p.minimum_stock;
+          
+          // Qaabka cusub ee digniinta (Waxaan ka dhigay mid isticmaalaya midabada CSS-kaaga)
+          const rowStyle = isLow ? 'background-color: #fff8e1;' : ''; 
+          
+          return `
+          <tr style="${rowStyle}">
+            <td style="font-weight: 500;">${p.part_name}</td>
+            <td>${p.brand || '-'}</td>
+            <td>$${Number(p.buy_price).toFixed(2)}</td>
+            <td>$${Number(p.sell_price).toFixed(2)}</td>
+            <td style="color: ${isLow ? '#dc2626' : 'var(--text)'}; font-weight: 600;">${p.current_stock}</td>
+            <td>${p.minimum_stock}</td>
+            <td>
+              <button class="btn" onclick="openStockModal(${p.part_id}, '${p.part_name}', ${p.buy_price})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">+ Stock</button>
+            </td>
+          </tr>
+        `}).join('');
+      } catch (err) { alert(err.message); }
+    }
+
+    document.getElementById('partForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        await API.post('/api/spare-parts', body);
+        document.getElementById('partDialog').close();
+        e.target.reset();
+        loadParts();
+      } catch (err) { alert(err.message); }
+    };
+
+    document.getElementById('stockForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      const id = body.part_id;
+      delete body.part_id;
+
+      try {
+        await API.post(`/api/spare-parts/${id}/stock-in`, body);
+        document.getElementById('stockDialog').close();
+        e.target.reset();
+        loadParts();
+      } catch (err) { alert(err.message); }
+    };
+
+    loadParts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Users Management - Happy Repairing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="currentUser">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="repairs.html">Repairs</a>
+    <a href="spare-parts.html">Spare Parts</a>
+    <a href="sales.html">Sales</a>
+    <a href="payments.html">Payments</a>
+    <a href="users.html" class="active">Users</a>
+  </div>
+
+  <div class="container">
+    <div class="section-heading">
+      <h2>Staff Management (Users)</h2>
+      <div class="line"></div>
+      <button class="btn" onclick="openUserModal()">+ New User</button>
+    </div>
+
+    <div style="overflow-x: auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role (Qaybta)</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: User Cusub -->
+  <dialog id="userDialog" style="width: min(500px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Ku dar Shaqaale Cusub</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <form id="userForm" class="form-grid">
+        <label class="field full">Username * <input type="text" name="username" required placeholder="Tusaale: cali_repair"></label>
+        <label class="field full">Password * <input type="password" name="password" required placeholder="Furaha sirta ah"></label>
+        <label class="field full">Role (Qaybta uu ka shaqeeyo) * 
+          <select name="role" required>
+            <option value="repair">Repair (Dayactirka kaliya)</option>
+            <option value="sales">Sales (Iibka kaliya)</option>
+            <option value="admin">Admin (Wax walba)</option>
+          </select>
+        </label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('userDialog').close()">Jooji</button>
+      <button type="submit" form="userForm" class="btn">Keydi User-ka</button>
+    </div>
+  </dialog>
+
+  <script src="js/common.js"></script>
+  <script>
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    document.getElementById('currentUser').textContent = localStorage.getItem('username') || 'admin';
+
+    // Hubi in qofkan uu yahay Admin
+    if (localStorage.getItem('role') !== 'admin') {
+      alert('Ma haysatid fasax aad ku gasho boggan.');
+      window.location.href = 'dashboard.html';
+    }
+
+    function openUserModal() {
+      document.getElementById('userForm').reset();
+      document.getElementById('userDialog').showModal();
+    }
+
+    async function loadUsers() {
+      try {
+        const users = await API.get('/api/auth/users');
+        document.getElementById('usersTable').innerHTML = users.map(u => `
+          <tr>
+            <td>#${u.user_id}</td>
+            <td style="font-weight: 600;">${u.username}</td>
+            <td><span class="badge" style="background: var(--hover-bg); color: var(--text); text-transform: capitalize;">${u.role}</span></td>
+            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+            <td>
+              ${u.username !== 'admin' ? `<button class="btn danger" onclick="deleteUser(${u.user_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Delete</button>` : '-'}
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) { alert(err.message); }
+    }
+
+    document.getElementById('userForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        await API.post('/api/auth/users', body);
+        document.getElementById('userDialog').close();
+        loadUsers();
+      } catch (err) { alert(err.message); }
+    };
+
+    async function deleteUser(id) {
+      if (!confirm('Ma hubtaa inaad tirtirto shaqaalahan?')) return;
+      try {
+        await API.delete(`/api/auth/users/${id}`);
+        loadUsers();
+      } catch (err) { alert(err.message); }
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

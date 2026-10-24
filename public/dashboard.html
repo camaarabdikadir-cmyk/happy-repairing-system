@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Happy Repairing </title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <!-- Navbar -->
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing 
+      <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="repairs.html">Repairs</a>
+    <a href="spare-parts.html">Spare Parts</a>
+    <a href="sales.html">Sales</a>
+    <a href="payments.html">Payments</a>
+  </div>
+
+  <!-- Container-ka Dashboard-ka -->
+  <div class="container">
+    
+    <!-- Qaybta Welcome -->
+    <div class="welcome">
+      <div>
+        <div class="date" id="currentDate"></div>
+        <h1>Welcome, <span id="adminName">admin</span>.</h1>
+        <p>Where every job is, and the money.</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn secondary" id="btnPayments" onclick="window.location.href='payments.html'">See Payments</button>
+        <button class="btn" id="mainActionBtn" onclick="window.location.href='repairs.html'">+ New Repair</button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- QAYBTA REPAIRS (Waxaa arki kara Admin & Repair kaliya) -->
+    <!-- ========================================== -->
+    <div id="repairsSection">
+      <div class="section-heading">
+        <h2>Repairs</h2>
+        <div class="line"></div>
+        <div class="section-meta"><span id="rTotal">0</span> Total</div>
+      </div>
+
+      <div class="jobs-grid">
+        <div class="job-status">
+          <h3>In Progress</h3>
+          <div class="number" id="rInProg">0</div>
+          <div class="status-progress">
+            <span class="current"></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p>Currently being fixed</p>
+        </div>
+        <div class="job-status">
+          <h3>Delivered</h3>
+          <div class="number" id="rDeliv">0</div>
+          <div class="status-progress">
+            <span class="completed"></span><span class="completed"></span><span class="current"></span><span></span><span></span>
+          </div>
+          <p>Handed to customer</p>
+        </div>
+        
+        <div class="job-status">
+          <h3>Pending Parts</h3>
+          <div class="number">0</div>
+          <div class="status-progress"><span></span><span></span><span></span><span></span><span></span></div>
+          <p>Waiting for stock</p>
+        </div>
+        <div class="job-status">
+          <h3>Returned</h3>
+          <div class="number">0</div>
+          <div class="status-progress"><span></span><span></span><span></span><span></span><span></span></div>
+          <p>Customer returned device</p>
+        </div>
+        <div class="job-status">
+          <h3>Cancelled</h3>
+          <div class="number">0</div>
+          <div class="status-progress"><span></span><span></span><span></span><span></span><span></span></div>
+          <p>Job cancelled</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qaybta Money -->
+    <div class="section-heading">
+      <h2>Money</h2>
+      <div class="line"></div>
+      <div class="section-meta">Dollars counted apart</div>
+    </div>
+
+    <div class="money-grid">
+      <div class="money-card">
+        <h3>Billed</h3>
+        <div class="amount" id="mBilled">$0.00</div>
+        <div class="description">Total amount invoiced</div>
+      </div>
+      <div class="money-card">
+        <h3>Paid</h3>
+        <div class="amount" id="mPaid">$0.00</div>
+        <div class="description">Total amount collected</div>
+      </div>
+      <div class="money-card">
+        <h3>Outstanding</h3>
+        <div class="amount" id="mOut" style="color: #dc2626;">$0.00</div>
+        <div class="description">Awaiting payment</div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- QAYBTA RECENT REPAIRS (Waxaa arki kara Admin & Repair kaliya) -->
+    <!-- ========================================== -->
+    <div id="recentSection">
+      <div class="section-heading" style="margin-top: 55px;">
+        <h2>Recent Repairs</h2>
+        <div class="line"></div>
+      </div>
+      
+      <div style="overflow-x: auto; margin-bottom: 50px;">
+        <table>
+          <thead><tr><th>Customer</th><th>Device</th><th>Cost</th><th>Status</th></tr></thead>
+          <tbody id="recentTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    
+    // Soo bandhig taariikhda
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Soo bandhig magaca qofka galay
+    const loggedInUser = localStorage.getItem('username') || 'admin';
+    const userRole = localStorage.getItem('role') || 'admin';
+    
+    document.getElementById('userDisplay').textContent = loggedInUser;
+    document.getElementById('adminName').textContent = loggedInUser;
+
+    // ==========================================
+    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const nav = document.querySelector('.nav');
+
+      if (userRole === 'admin') {
+        // Admin: Ku dar Users
+        if (!nav.querySelector('a[href="users.html"]')) {
+          const usersLink = document.createElement('a');
+          usersLink.href = 'users.html';
+          usersLink.textContent = 'Users';
+          nav.appendChild(usersLink);
+        }
+      } 
+      else if (userRole === 'repair') {
+        // Repair: Qari Sales
+        nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
+      } 
+      else if (userRole === 'sales') {
+        // Sales: Qari Repairs, Spare Parts, iyo Payments ee Navbar-ka
+        nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
+        
+        // SALES: QARI DHAMAAN XOGTA REPAIRS KA DASHBOARD-KA
+        const repairsSection = document.getElementById('repairsSection');
+        if (repairsSection) repairsSection.style.display = 'none';
+
+        const recentSection = document.getElementById('recentSection');
+        if (recentSection) recentSection.style.display = 'none';
+
+        // SALES: Qari badhanka See Payments
+        const btnPayments = document.getElementById('btnPayments');
+        if (btnPayments) btnPayments.style.display = 'none';
+
+        // SALES: Beddel badhanka New Repair una beddel New Sale
+        const mainActionBtn = document.getElementById('mainActionBtn');
+        if (mainActionBtn) {
+          mainActionBtn.textContent = '+ New Sale';
+          mainActionBtn.onclick = () => window.location.href = 'sales.html';
+        }
+      }
+    });
+
+    // Soo qaado xogta Dashboard-ka
+    async function loadData() {
+      try {
+        const data = await API.get('/api/dashboard');
+        
+        // Xogta Lacagaha (Qof walba wuu arki karaa haddii loo baahdo, laakiin waad qarin kartaa haddii aad rabto)
+        document.getElementById('mBilled').textContent = '$' + data.money.billed.toFixed(2);
+        document.getElementById('mPaid').textContent = '$' + data.money.paid.toFixed(2);
+        document.getElementById('mOut').textContent = '$' + data.money.outstanding.toFixed(2);
+        
+        // Kaliya buuxi xogta Repairs-ka haddii aanu ahayn Sales (iyadoo looga hortagayo qaladka)
+        if (userRole !== 'sales') {
+          document.getElementById('rTotal').textContent = data.repairs.total;
+          document.getElementById('rInProg').textContent = data.repairs.in_progress;
+          document.getElementById('rDeliv').textContent = data.repairs.delivered;
+
+          document.getElementById('recentTable').innerHTML = data.recent.map(r => `
+            <tr>
+              <td style="font-weight: 600;">${r.customer_name}</td>
+              <td>${r.brand} ${r.model}</td>
+              <td>$${Number(r.repair_cost).toFixed(2)}</td>
+              <td style="font-weight: 500;">${r.status}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) { alert(err.message); }
+    }
+    loadData();
+  </script>
+</body>
+</html>

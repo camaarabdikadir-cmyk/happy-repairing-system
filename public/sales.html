@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sales & Products - Happy Repairing</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <!-- Topbar Qaybta 1aad -->
+  <div class="topbar">
+    <div class="brand">
+      happy.repairing 
+      <span class="subtitle">Berbera, Somaliland</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
+      <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+    </div>
+  </div>
+
+  <!-- Topbar Qaybta 2aad (Navigation) -->
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="repairs.html">Repairs</a>
+    <a href="spare-parts.html">Spare Parts</a>
+    <a href="sales.html" class="active">Sales</a>
+    <a href="payments.html">Payments</a>
+  </div>
+
+  <div class="container">
+    
+    <!-- Section Heading -->
+    <div class="section-heading">
+      <h2>Sales & Products</h2>
+      <div class="line"></div>
+      <button class="btn" onclick="openProductModal()">+ New Product</button>
+    </div>
+
+    <!-- Table-ka -->
+    <div style="overflow-x: auto; margin-bottom: 50px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Buy Price</th>
+            <th>Sell Price</th>
+            <th>Current Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal-ka Alaabta Cusub -->
+  <dialog id="productDialog" style="width: min(600px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Ku dar Alaab Cusub</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <form id="productForm" class="form-grid">
+        <label class="field full">Magaca Alaabta * <input type="text" name="product_name" required></label>
+        <label class="field full">Nooca (Category) <input type="text" name="category" placeholder="Tusaale: Charger, Screen..."></label>
+        <label class="field">Stock-ka Hore <input type="number" name="current_stock" value="0"></label>
+        <label class="field">Qiimaha Iibsiga ($) <input type="number" name="buy_price" step="0.01" required></label>
+        <label class="field">Qiimaha Iibka ($) <input type="number" name="sell_price" step="0.01" required></label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('productDialog').close()">Jooji</button>
+      <button type="submit" form="productForm" class="btn">Keydi</button>
+    </div>
+  </dialog>
+
+  <!-- Modal-ka Iibka (Sell) -->
+  <dialog id="sellDialog" style="width: min(500px, 95vw);">
+    <div class="dialog-head">
+      <h3 style="margin: 0; font-family: var(--font-heading);">Iibi Alaabta</h3>
+    </div>
+    
+    <div class="dialog-body">
+      <p id="sellProductName" style="font-weight: 600; color: var(--text); font-size: 1.1rem; margin-bottom: 1rem;"></p>
+      <form id="sellForm" class="form-grid">
+        <input type="hidden" name="product_id" id="sellProductId">
+        <label class="field">Tirada la Iibinayo * <input type="number" name="quantity" required min="1" value="1"></label>
+        <label class="field">Qiimaha Iibka ($) * <input type="number" name="sell_price" id="sellPrice" step="0.01" required></label>
+        <label class="field full">Faahfaahin <input type="text" name="note" placeholder="Tusaale: Macmiil Axmed"></label>
+      </form>
+    </div>
+
+    <div class="dialog-foot">
+      <button type="button" class="btn secondary" onclick="document.getElementById('sellDialog').close()">Jooji</button>
+      <button type="submit" form="sellForm" class="btn">Xaqiiji Iibka</button>
+    </div>
+  </dialog>
+
+  <script src="js/common.js"></script>
+  <script>
+    function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+    // Soo bandhig magaca qofka galay
+    document.getElementById('userDisplay').textContent = localStorage.getItem('username') || 'admin';
+
+    // ==========================================
+    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const role = localStorage.getItem('role');
+      const nav = document.querySelector('.nav');
+
+      if (role === 'admin') {
+        if (!nav.querySelector('a[href="users.html"]')) {
+          const usersLink = document.createElement('a');
+          usersLink.href = 'users.html';
+          usersLink.textContent = 'Users';
+          nav.appendChild(usersLink);
+        }
+      } 
+      else if (role === 'repair') {
+        nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
+      } 
+      else if (role === 'sales') {
+        nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
+      }
+    });
+
+    function openProductModal() {
+      document.getElementById('productForm').reset();
+      document.getElementById('productDialog').showModal();
+    }
+
+    function openSellModal(id, name, price) {
+      document.getElementById('sellProductId').value = id;
+      document.getElementById('sellProductName').textContent = `Alaabta: ${name}`;
+      document.getElementById('sellPrice').value = price;
+      document.getElementById('sellForm').reset();
+      document.getElementById('sellForm').querySelector('[name="quantity"]').value = 1; // Default
+      document.getElementById('sellPrice').value = price; // Reset price after form reset
+      document.getElementById('sellDialog').showModal();
+    }
+
+    async function loadProducts() {
+      try {
+        const products = await API.get('/api/products');
+        document.getElementById('productsTable').innerHTML = products.map(p => `
+          <tr>
+            <td style="font-weight: 500;">${p.product_name}</td>
+            <td>${p.category || '-'}</td>
+            <td>$${Number(p.buy_price).toFixed(2)}</td>
+            <td>$${Number(p.sell_price).toFixed(2)}</td>
+            <td style="font-weight: 600; color: ${p.current_stock > 0 ? 'var(--text)' : '#dc2626'};">${p.current_stock}</td>
+            <td style="white-space: nowrap;">
+              <button class="btn" onclick="openSellModal(${p.product_id}, '${p.product_name}', ${p.sell_price})" ${p.current_stock === 0 ? 'disabled' : ''} style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Sell</button>
+              <button class="btn" onclick="alert('Stock In feature coming soon')" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">+ Stock</button>
+              <button class="btn danger" onclick="deleteProduct(${p.product_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) { alert(err.message); }
+    }
+
+    document.getElementById('productForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        await API.post('/api/products', body);
+        document.getElementById('productDialog').close();
+        loadProducts();
+      } catch (err) { alert(err.message); }
+    };
+
+    document.getElementById('sellForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      const id = body.product_id;
+      delete body.product_id;
+
+      try {
+        await API.post(`/api/products/${id}/sell`, body);
+        document.getElementById('sellDialog').close();
+        loadProducts();
+        alert('Alaabta si guul leh ayaa loo iibiyay!');
+      } catch (err) { alert(err.message); }
+    };
+
+    async function deleteProduct(id) {
+      if (!confirm('Ma hubtaa inaad tirtirto alaabtan?')) return;
+      try {
+        await API.delete(`/api/products/${id}`);
+        loadProducts();
+      } catch (err) { alert(err.message); }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
