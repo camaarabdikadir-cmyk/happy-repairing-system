@@ -78,7 +78,7 @@ button {
 }
 
 /* =========================================
-   TOP HEADER
+   TOP HEADER & NAVIGATION
    ========================================= */
 
 .topbar {
@@ -90,9 +90,10 @@ button {
     padding: 18px 3.1%;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1001;
 }
 
-/* Brand */
 .brand {
     display: flex;
     align-items: center;
@@ -113,10 +114,6 @@ button {
     color: var(--muted);
 }
 
-/* =========================================
-   NAVIGATION
-   ========================================= */
-
 .nav {
     display: flex;
     align-items: center;
@@ -125,6 +122,8 @@ button {
     border-bottom: 3px solid var(--strong-border);
     background: var(--surface);
     padding: 0 3.1%;
+    position: relative;
+    z-index: 1000;
 }
 
 .nav a {
@@ -150,8 +149,19 @@ button {
     font-weight: 700;
 }
 
+/* Badhanka Menu-ga Mobilka (Wuxuu qarsoonaan doonaa PC-ga) */
+.menu-toggle {
+    display: none;
+    font-size: 28px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 5px;
+}
+
 /* =========================================
-   CONTAINER
+   CONTAINER & HEADINGS
    ========================================= */
 
 .container {
@@ -166,12 +176,8 @@ button {
     font-family: var(--font-heading);
     font-size: 36px;
     font-weight: 600;
-    letter-spacing: -0.8px; /* Fixed typo: letterter to letter */
+    letter-spacing: -0.8px;
 }
-
-/* =========================================
-   DASHBOARD WELCOME
-   ========================================= */
 
 .welcome {
     display: flex;
@@ -186,7 +192,7 @@ button {
     font-family: var(--font-heading);
     font-size: 64px;
     font-weight: 600;
-    letter-spacing: -2px; /* Fixed typo: letterter to letter */
+    letter-spacing: -2px;
 }
 
 .welcome p {
@@ -200,7 +206,6 @@ button {
     color: var(--text);
 }
 
-/* Welcome action buttons */
 .welcome-actions {
     display: flex;
     align-items: center;
@@ -225,15 +230,11 @@ button {
     font-size: 17px;
     font-weight: 600;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
 }
 
-.btn:hover {
-    opacity: 0.85;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
+.btn:hover { opacity: 0.85; }
+.btn:active { transform: scale(0.98); }
 
 .btn.secondary {
     background: transparent;
@@ -295,9 +296,7 @@ button {
     border-right: 1px solid var(--border);
 }
 
-.job-status:last-child {
-    border-right: none;
-}
+.job-status:last-child { border-right: none; }
 
 .job-status h3 {
     min-height: 60px;
@@ -306,7 +305,7 @@ button {
     font-family: var(--font-body);
     font-size: 14px;
     font-weight: 700;
-    letter-spacing: 1px; /* Fixed typo */
+    letter-spacing: 1px;
     line-height: 1.5;
     text-transform: uppercase;
 }
@@ -345,9 +344,7 @@ button {
     background: transparent;
 }
 
-.status-progress span.completed {
-    background: var(--text);
-}
+.status-progress span.completed { background: var(--text); }
 
 .status-progress span.current {
     background: var(--accent);
@@ -390,26 +387,6 @@ button {
 }
 
 /* =========================================
-   GENERAL CARDS
-   ========================================= */
-
-.card {
-    padding: 25px;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 0;
-    box-shadow: none;
-}
-
-.card h3 {
-    margin: 0 0 18px;
-    font-family: var(--font-heading);
-    font-size: 25px;
-    font-weight: 600;
-}
-
-/* =========================================
    TABLES
    ========================================= */
 
@@ -420,9 +397,7 @@ table {
     font-size: 15px;
 }
 
-thead {
-    border-bottom: 2px solid var(--strong-border);
-}
+thead { border-bottom: 2px solid var(--strong-border); }
 
 th {
     padding: 15px 12px;
@@ -431,7 +406,7 @@ th {
     font-weight: 700;
     text-align: left;
     text-transform: uppercase;
-    letter-spacing: 0.5px; /* Fixed typo */
+    letter-spacing: 0.5px;
 }
 
 td {
@@ -439,12 +414,10 @@ td {
     border-bottom: 1px solid var(--border);
 }
 
-tbody tr:hover {
-    background: var(--hover-bg);
-}
+tbody tr:hover { background: var(--hover-bg); }
 
 /* =========================================
-   MODALS (DIALOGS)
+   FORMS & MODALS
    ========================================= */
 
 dialog {
@@ -489,19 +462,13 @@ dialog::backdrop {
     border-radius: 0 0 12px 12px;
 }
 
-/* =========================================
-   FORMS
-   ========================================= */
-
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
-.form-grid .full {
-    grid-column: 1 / -1;
-}
+.form-grid .full { grid-column: 1 / -1; }
 
 .field {
     display: flex;
@@ -533,158 +500,78 @@ dialog::backdrop {
 }
 
 /* =========================================
-   THEME SWITCHER
-   ========================================= */
-
-.theme-container {
-    position: relative;
-    display: inline-block;
-}
-
-.theme-button {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 10px 14px;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.theme-button:hover {
-    background: var(--hover-bg);
-}
-
-.theme-menu {
-    position: absolute;
-    top: calc(100% + 7px);
-    right: 0;
-    width: 270px;
-    padding: 5px;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-}
-
-.theme-menu[hidden] {
-    display: none !important;
-}
-
-.theme-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px;
-    background: transparent;
-    color: var(--text);
-    border: none;
-    border-radius: 6px;
-    text-align: left;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.theme-option:hover,
-.theme-option.active {
-    background: var(--hover-bg);
-}
-
-.theme-check {
-    margin-left: auto;
-    visibility: hidden;
-}
-
-.theme-option.active .theme-check {
-    visibility: visible;
-}
-
-.theme-icon {
-    width: 22px;
-    text-align: center;
-    font-size: 20px;
-}
-
-/* =========================================
-   RESPONSIVE
+   RESPONSIVE DESIGN (MOBILE & TABLET)
 ========================================= */
 
 @media (max-width: 1200px) {
-    .jobs-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    .job-status {
-        border-bottom: 1px solid var(--border);
-    }
-    .welcome h1 {
-        font-size: 52px;
-    }
+    .jobs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .job-status { border-bottom: 1px solid var(--border); }
+    .welcome h1 { font-size: 52px; }
 }
 
 @media (max-width: 768px) {
-    .topbar {
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 15px 20px;
-    }
-    .brand {
-        font-size: 26px;
-    }
+    .topbar { padding: 15px 20px; min-height: auto; }
+    .brand { font-size: 24px; flex-direction: column; align-items: flex-start; gap: 5px; }
+    .brand .subtitle { font-size: 12px; }
+    
+    /* Soo bandhig badhanka Menu-ga */
+    .menu-toggle { display: block; }
+    
+    /* Qari links-ka oo ka dhig menu hoos u soo baxa */
     .nav {
-        overflow-x: auto;
-        padding: 0 15px;
-    }
-    .nav a {
-        padding: 0 16px;
-        font-size: 15px;
-        white-space: nowrap;
-    }
-    .container {
-        padding: 25px 20px;
-    }
-    .welcome {
+        display: none;
         flex-direction: column;
-        align-items: flex-start;
-    }
-    .welcome h1 {
-        font-size: 42px;
-    }
-    .welcome-actions {
-        flex-wrap: wrap;
-    }
-    .jobs-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .job-status {
-        padding: 18px 12px;
-    }
-    .job-status .number {
-        font-size: 52px;
-    }
-    .money-grid {
-        grid-template-columns: 1fr;
-    }
-    .section-heading h2 {
-        font-size: 27px;
+        width: 100%;
+        border-bottom: none;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        padding: 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
-    /* Mobile Form */
-    .form-grid {
-        grid-template-columns: 1fr;
+    .nav.active { display: flex; }
+    
+    .nav a {
+        height: auto;
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border);
+        width: 100%;
+        text-align: left;
+        margin-bottom: 0;
+        border-left: 4px solid transparent;
     }
+
+    .nav a.active {
+        border-bottom-color: var(--border);
+        border-left-color: var(--strong-border);
+    }
+
+    .container { padding: 25px 20px; }
+    .welcome { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .welcome h1 { font-size: 36px; }
+    .welcome-actions { flex-wrap: wrap; width: 100%; }
+    .welcome-actions .btn { flex: 1; }
+    
+    .jobs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .job-status { padding: 18px 12px; border-bottom: 1px solid var(--border); }
+    .job-status .number { font-size: 48px; }
+    .money-grid { grid-template-columns: 1fr; }
+    .section-heading h2 { font-size: 24px; }
+    
+    /* Form-ka oo hal tiir noqda */
+    .form-grid { grid-template-columns: 1fr; }
+    
+    /* Shaxda (Table) oo la side-scroll gareyn karo */
+    table { min-width: 600px; }
+    div[style*="overflow-x"] { padding-bottom: 10px; }
 }
 
-@media (max-width: 420px) {
-    .jobs-grid {
-        grid-template-columns: 1fr;
-    }
-    .job-status {
-        border-right: none;
-    }
+@media (max-width: 480px) {
+    .jobs-grid { grid-template-columns: 1fr; }
+    .job-status { border-right: none; }
+    .brand { font-size: 20px; }
+    .welcome h1 { font-size: 28px; }
 }

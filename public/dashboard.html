@@ -13,9 +13,12 @@
       happy.repairing 
       <span class="subtitle">Berbera, Somaliland</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
       <span style="color: var(--muted); font-size: 15px;" id="userDisplay">admin</span>
       <button class="btn danger" onclick="logout()" style="padding: 8px 15px; min-height: 40px; font-size: 15px;">Logout</button>
+      
+      <!-- BADHANKA MENU-GA EE MOBILKA -->
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     </div>
   </div>
 
@@ -44,9 +47,7 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- QAYBTA REPAIRS (Waxaa arki kara Admin & Repair kaliya) -->
-    <!-- ========================================== -->
+    <!-- QAYBTA REPAIRS -->
     <div id="repairsSection">
       <div class="section-heading">
         <h2>Repairs</h2>
@@ -118,9 +119,7 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- QAYBTA RECENT REPAIRS (Waxaa arki kara Admin & Repair kaliya) -->
-    <!-- ========================================== -->
+    <!-- QAYBTA RECENT REPAIRS -->
     <div id="recentSection">
       <div class="section-heading" style="margin-top: 55px;">
         <h2>Recent Repairs</h2>
@@ -141,6 +140,12 @@
   <script>
     function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     
+    // Function-ka badhanka menu-ga ee mobilka
+    function toggleMenu() {
+      const nav = document.querySelector('.nav');
+      nav.classList.toggle('active');
+    }
+
     // Soo bandhig taariikhda
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -151,14 +156,11 @@
     document.getElementById('userDisplay').textContent = loggedInUser;
     document.getElementById('adminName').textContent = loggedInUser;
 
-    // ==========================================
-    // SCRIPT-KA ROLE-KA (Qarinta & Ku darista links)
-    // ==========================================
+    // SCRIPT-KA ROLE-KA
     document.addEventListener("DOMContentLoaded", () => {
       const nav = document.querySelector('.nav');
 
       if (userRole === 'admin') {
-        // Admin: Ku dar Users
         if (!nav.querySelector('a[href="users.html"]')) {
           const usersLink = document.createElement('a');
           usersLink.href = 'users.html';
@@ -167,25 +169,20 @@
         }
       } 
       else if (userRole === 'repair') {
-        // Repair: Qari Sales
         nav.querySelectorAll('a[href="sales.html"]').forEach(el => el.style.display = 'none');
       } 
       else if (userRole === 'sales') {
-        // Sales: Qari Repairs, Spare Parts, iyo Payments ee Navbar-ka
         nav.querySelectorAll('a[href="repairs.html"], a[href="spare-parts.html"], a[href="payments.html"]').forEach(el => el.style.display = 'none');
         
-        // SALES: QARI DHAMAAN XOGTA REPAIRS KA DASHBOARD-KA
         const repairsSection = document.getElementById('repairsSection');
         if (repairsSection) repairsSection.style.display = 'none';
 
         const recentSection = document.getElementById('recentSection');
         if (recentSection) recentSection.style.display = 'none';
 
-        // SALES: Qari badhanka See Payments
         const btnPayments = document.getElementById('btnPayments');
         if (btnPayments) btnPayments.style.display = 'none';
 
-        // SALES: Beddel badhanka New Repair una beddel New Sale
         const mainActionBtn = document.getElementById('mainActionBtn');
         if (mainActionBtn) {
           mainActionBtn.textContent = '+ New Sale';
@@ -199,12 +196,10 @@
       try {
         const data = await API.get('/api/dashboard');
         
-        // Xogta Lacagaha (Qof walba wuu arki karaa haddii loo baahdo, laakiin waad qarin kartaa haddii aad rabto)
         document.getElementById('mBilled').textContent = '$' + data.money.billed.toFixed(2);
         document.getElementById('mPaid').textContent = '$' + data.money.paid.toFixed(2);
         document.getElementById('mOut').textContent = '$' + data.money.outstanding.toFixed(2);
         
-        // Kaliya buuxi xogta Repairs-ka haddii aanu ahayn Sales (iyadoo looga hortagayo qaladka)
         if (userRole !== 'sales') {
           document.getElementById('rTotal').textContent = data.repairs.total;
           document.getElementById('rInProg').textContent = data.repairs.in_progress;

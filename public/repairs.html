@@ -4,6 +4,35 @@
   <meta charset="UTF-8">
   <title>Repairs - Happy Repairing</title>
   <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* CSS-ka loogu talagalay marka la daabacayo (Print A6) */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #invoiceContent, #invoiceContent * {
+        visibility: visible;
+      }
+      #invoiceContent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        width: 105mm;
+        height: 148mm;
+        box-shadow: none;
+      }
+      .no-print {
+        display: none !important;
+      }
+      @page {
+        size: A6;
+        margin: 5mm;
+      }
+    }
+  </style>
 </head>
 <body>
   
@@ -131,13 +160,118 @@
     </div>
   </dialog>
 
+  <!-- ============================================== -->
+  <!-- MODAL-KA INVOICE-KA (Cabbirka A6) -->
+  <!-- ============================================== -->
+  <dialog id="invoiceDialog" style="width: 105mm; min-height: 148mm; padding: 0; background: #fff; border: 1px solid #ccc; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden;">
+    
+    <!-- Header-ka Modal-ka (Badhamada) -->
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #f8f9fa; border-bottom: 1px solid #ddd;">
+      <h3 style="margin: 0; font-size: 14px; font-family: var(--font-heading);">Invoice (A6)</h3>
+      <div>
+        <button class="btn" onclick="window.print()" style="padding: 4px 8px; font-size: 11px; margin-right: 5px;">🖨️ Print</button>
+        <button class="btn danger" onclick="document.getElementById('invoiceDialog').close()" style="padding: 4px 8px; font-size: 11px;">Xir</button>
+      </div>
+    </div>
+    
+    <!-- Qaybta la Daabacayo (Invoice-ka A6) -->
+    <div style="padding: 10px; height: 100%;" id="invoiceContent">
+      <div class="invoice-container" style="width: 100%; font-size: 10px; color: #000; box-sizing: border-box;">
+        
+        <!-- Logo & Title -->
+        <div class="header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1.5px solid #a80000; padding-bottom: 5px;">
+          <div class="logo-area" style="display: flex; flex-direction: column;">
+            <h1 class="logo-title" style="margin: 0; font-family: 'Arial Black', Impact, sans-serif; font-size: 18px; font-weight: 900; color: #111;">h<span style="color: #a80000;">appy</span></h1>
+            <div class="logo-subtitle" style="font-size: 7px; font-weight: bold; letter-spacing: 0.5px;">REPAIRING CENTER</div>
+          </div>
+          <div class="invoice-title" style="font-size: 16px; font-weight: bold; color: #a80000;">INVOICE</div>
+        </div>
+
+        <!-- Info Blocks -->
+        <div class="info-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; gap: 10px;">
+          <div class="info-box" style="flex: 1;">
+            <div class="section-title" style="background: #a80000; color: #fff; padding: 2px 5px; font-weight: bold; font-size: 9px; margin-bottom: 4px;">BILL TO</div>
+            <p style="margin: 2px 0; font-weight: bold;">Name: <span id="invCustomer"></span></p>
+            <p style="margin: 2px 0; font-weight: bold;">Phone: <span id="invPhone"></span></p>
+            <p style="margin: 2px 0; font-weight: bold;">Address: <span id="invAddress"></span></p>
+          </div>
+          <div class="info-box right" style="flex: 1; max-width: 160px;">
+            <div class="invoice-details-row" style="display: flex; gap: 5px; margin-bottom: 4px;">
+              <div style="flex: 1;">
+                <div class="section-title" style="background: #a80000; color: #fff; padding: 2px 5px; font-weight: bold; font-size: 9px; margin-bottom: 4px;">INVOICE #</div>
+                <p id="invNumber" style="margin: 2px 0; font-weight: bold;"></p>
+              </div>
+              <div style="flex: 1;">
+                <div class="section-title" style="background: #a80000; color: #fff; padding: 2px 5px; font-weight: bold; font-size: 9px; margin-bottom: 4px;">DATE</div>
+                <p id="invDate" style="margin: 2px 0; font-weight: bold;"></p>
+              </div>
+            </div>
+            <div>
+              <div class="section-title" style="background: #a80000; color: #fff; padding: 2px 5px; font-weight: bold; font-size: 9px; margin-bottom: 4px;">CUSTOMER ID</div>
+              <p id="invCustId" style="margin: 2px 0; font-weight: bold;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table-ka -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+          <thead>
+            <tr>
+              <th style="background: #a80000; color: #fff; padding: 3px; border: 1px solid #000; text-align: left; font-size: 9px;">DESCRIPTION</th>
+              <th style="background: #a80000; color: #fff; padding: 3px; border: 1px solid #000; text-align: left; font-size: 9px; width: 20px;">QTY</th>
+              <th style="background: #a80000; color: #fff; padding: 3px; border: 1px solid #000; text-align: left; font-size: 9px; width: 50px;">PRICE</th>
+              <th style="background: #a80000; color: #fff; padding: 3px; border: 1px solid #000; text-align: left; font-size: 9px; width: 50px;">AMOUNT</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceItems">
+            <!-- JS ayaa buuxin doonta -->
+          </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-area" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div class="thanks" style="font-style: italic; font-weight: bold; font-size: 9px;">Thank you!</div>
+          
+          <table class="totals-table" style="width: 160px; border-collapse: collapse;">
+            <tr>
+              <td class="label" style="background: #a80000; color: #fff; padding: 3px 5px; border: 1px solid #000; font-weight: bold; font-size: 9px;">Sub Total</td>
+              <td class="value" id="invSubTotal" style="padding: 3px 5px; border: 1px solid #000; text-align: right; font-weight: bold; font-size: 9px;"></td>
+            </tr>
+            <tr>
+              <td class="label" style="background: #a80000; color: #fff; padding: 3px 5px; border: 1px solid #000; font-weight: bold; font-size: 9px;">Discount</td>
+              <td class="value" id="invDiscount" style="padding: 3px 5px; border: 1px solid #000; text-align: right; font-weight: bold; font-size: 9px;"></td>
+            </tr>
+            <tr>
+              <td class="label" style="background: #a80000; color: #fff; padding: 3px 5px; border: 1px solid #000; font-weight: bold; font-size: 9px;">Net Amount</td>
+              <td class="value" id="invNet" style="padding: 3px 5px; border: 1px solid #000; text-align: right; font-weight: bold; font-size: 9px;"></td>
+            </tr>
+            <tr>
+              <td class="label" style="background: #a80000; color: #fff; padding: 3px 5px; border: 1px solid #000; font-weight: bold; font-size: 9px;">Paid</td>
+              <td class="value" id="invPaid" style="padding: 3px 5px; border: 1px solid #000; text-align: right; font-weight: bold; font-size: 9px;"></td>
+            </tr>
+            <tr>
+              <td class="label" style="background: #a80000; color: #fff; padding: 3px 5px; border: 1px solid #000; font-weight: bold; font-size: 9px; border-bottom: 2px solid #000;">Balance</td>
+              <td class="value" id="invBalance" style="padding: 3px 5px; border: 1px solid #000; text-align: right; font-weight: bold; font-size: 9px; border-bottom: 2px solid #000;"></td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer" style="text-align: center; margin-top: 15px; font-size: 8px; font-weight: bold;">
+          <p style="margin: 2px 0;">If you have any questions, please contact:</p>
+          <p style="margin: 2px 0;">0634245417 | zuldan@gmail.com</p>
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
   <script src="js/common.js"></script>
   <script>
     document.getElementById('f_received_date').valueAsDate = new Date();
     
     function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
-    // Soo bandhig magaca qofka galay
     document.getElementById('userDisplay').textContent = localStorage.getItem('username') || 'admin';
 
     // ==========================================
@@ -258,6 +392,61 @@
       } catch (err) { alert(err.message); }
     }
 
+    // ==========================================
+    // FUNCTION-KA CUSUB EE INVOICE-KA (Wuxuu soo bandhigayaa Modal-ka)
+    // ==========================================
+    async function openInvoice(id) {
+      try {
+        const r = await API.get(`/api/repairs/${id}`);
+        
+        document.getElementById('invCustomer').textContent = r.customer_name;
+        document.getElementById('invPhone').textContent = r.customer_phone || 'N/A';
+        document.getElementById('invAddress').textContent = r.customer_address || 'N/A';
+        
+        document.getElementById('invNumber').textContent = `JOB-${String(r.repair_id).padStart(5, '0')}`;
+        document.getElementById('invDate').textContent = new Date(r.received_date || r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('invCustId').textContent = `CUS-${String(r.repair_id).padStart(5, '0')}`;
+
+        let desc = '';
+        if (r.repair_type === 'Spare Part' && r.part_name) {
+          desc = `${r.brand || ''} ${r.model || ''} - ${r.part_name} (${r.problem || 'Repair'})`;
+        } else {
+          desc = `${r.brand || ''} ${r.model || ''} - ${r.problem || 'Repair Service'}`;
+        }
+
+        let qty = r.spare_part_quantity || 1;
+        let cost = Number(r.repair_cost) || 0;
+        let unitPrice = cost / qty;
+
+        const itemsHtml = `
+          <tr>
+            <td style="padding: 4px; border: 1px solid #000; font-weight: bold;">${desc}</td>
+            <td style="padding: 4px; border: 1px solid #000; font-weight: bold;">${qty}</td>
+            <td style="padding: 4px; border: 1px solid #000; font-weight: bold;">$${unitPrice.toFixed(2)}</td>
+            <td style="padding: 4px; border: 1px solid #000; font-weight: bold;">$${cost.toFixed(2)}</td>
+          </tr>
+        `;
+        
+        // Halkan waxaan ka dhigay 3 saf oo madhan kaliya si aysan u buux dhaafin (No scrolling)
+        let emptyRows = '';
+        for(let i = 0; i < 3; i++) {
+          emptyRows += `<tr><td style="padding: 4px; border: 1px solid #000; height: 15px;"></td><td style="border: 1px solid #000;"></td><td style="border: 1px solid #000;"></td><td style="border: 1px solid #000;"></td></tr>`;
+        }
+        document.getElementById('invoiceItems').innerHTML = itemsHtml + emptyRows;
+
+        const paid = Number(r.paid) || 0;
+        const balance = cost - paid;
+
+        document.getElementById('invSubTotal').textContent = `$${cost.toFixed(2)}`;
+        document.getElementById('invDiscount').textContent = `$0.00`;
+        document.getElementById('invNet').textContent = `$${cost.toFixed(2)}`;
+        document.getElementById('invPaid').textContent = `$${paid.toFixed(2)}`;
+        document.getElementById('invBalance').textContent = `$${balance.toFixed(2)}`;
+
+        document.getElementById('invoiceDialog').showModal();
+      } catch (err) { alert(err.message); }
+    }
+
     async function loadRepairs() {
       try {
         const data = await API.get('/api/repairs');
@@ -275,8 +464,8 @@
             <td style="white-space: nowrap;">
               <button class="btn" onclick="viewRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">View</button>
               
-              <!-- BADHANKA CUSUB EE INVOICE-KA -->
-              <button class="btn" onclick="window.open('invoice.html?id=${r.repair_id}', '_blank')" style="padding: 6px 12px; min-height: 36px; font-size: 14px; border-color: #228B22; color: #228B22;">📄 Invoice</button>
+              <!-- BADHANKA CUSUB EE INVOICE-KA (Modal ayaa furmaya) -->
+              <button class="btn" onclick="openInvoice(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px; border-color: #228B22; color: #228B22;">📄 Invoice</button>
 
               <button class="btn" onclick="editRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Edit</button>
               <button class="btn danger" onclick="deleteRepair(${r.repair_id})" style="padding: 6px 12px; min-height: 36px; font-size: 14px;">Delete</button>
